@@ -1,11 +1,10 @@
-import React, {useState} from 'react';
-import PropTypes, {element} from 'prop-types';
+import React, { useState } from 'react';
+import PropTypes, { element } from 'prop-types';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { Labeled, useCreate, useInput } from 'react-admin';
 
 export const RaReactSelect = (props) => {
-
     const {
         valueField,
         labelField,
@@ -18,14 +17,21 @@ export const RaReactSelect = (props) => {
     };
 
     const options = props.choices.map((slice) => {
-        return { value: getOptionValue(slice), label: getOptionLabel(slice)};
+        return { value: getOptionValue(slice), label: getOptionLabel(slice) };
     });
 
-    let values = props.input.value.map((id) => {
+    // props.input.value is an empty string, when creating new records.
+    // So, we make sure it is an array
+    let value = props.input.value;
+    if (!Array.isArray(value)) {
+        value = [];
+    }
+
+    const values = value.map((id) => {
         return ({
             value: id,
-            label: options.find((element => element.value === id))?.label || '',
-        })
+            label: options.find(element => element.value === id)?.label || '',
+        });
     });
 
     const handleChange = (selectedOption) => {
@@ -33,24 +39,23 @@ export const RaReactSelect = (props) => {
         props.input.onChange(ids);
     };
 
-    const [creator, {loading, error: createError}] = useCreate(props.reference);
+    const [creator, { loading, error: createError }] = useCreate(props.reference);
 
     const onCreateOption = (value) => {
-
         creator({
-                payload: {
-                    data: {
-                        [labelField]: value,
-                    }
+            payload: {
+                data: {
+                    [labelField]: value,
                 }
-            },
-            {
-                onSuccess: (result) => {
-                    const id = result.data[valueField];
-                    props.input.onChange([...props.input.value, id]);
-                }
+            }
+        },
+        {
+            onSuccess: (result) => {
+                const id = result.data[valueField];
+                props.input.onChange([...props.input.value, id]);
+            }
 
-            });
+        });
     };
 
     const {
@@ -61,15 +66,15 @@ export const RaReactSelect = (props) => {
 
     const {
         isMulti,
-        className,  // This comes from react-admin, styling is wrong when using it
+        className, // This comes from react-admin, styling is wrong when using it
         ...rest
     } = props;
 
     const customStyles = {
         container: (provided, state) => ({
-                ...provided,
-                width: '100%'
-            }),
+            ...provided,
+            width: '100%'
+        }),
         menu: (provided, state) => ({
             ...provided,
             zIndex: 10,
@@ -83,17 +88,17 @@ export const RaReactSelect = (props) => {
                 isRequired={props.required}
                 fullWidth={props.fullWidth}
             >
-            <CreatableSelect
-                isMulti={isMulti}
-                className={className}
-                {...rest}
-                onChange={handleChange}
-                onCreateOption={onCreateOption}
-                options={options}
-                value={values}
-                fullWidth={props.fullWidth}
-                styles={customStyles}
-            />
+                <CreatableSelect
+                    isMulti={isMulti}
+                    className={className}
+                    {...rest}
+                    onChange={handleChange}
+                    onCreateOption={onCreateOption}
+                    options={options}
+                    value={values}
+                    fullWidth={props.fullWidth}
+                    styles={customStyles}
+                />
             </Labeled>
         );
     }
@@ -107,7 +112,6 @@ export const RaReactSelect = (props) => {
             value={values}
         />
     );
-
 };
 
 RaReactSelect.propTypes = {
@@ -123,5 +127,5 @@ RaReactSelect.defaultProps = {
     hideSelectedOptions: false,
 };
 
-//export default addField(RaReactSelect);
+// export default addField(RaReactSelect);
 export default RaReactSelect;
